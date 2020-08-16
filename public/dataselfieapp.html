@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Selfie App</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin="" />
+
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+
+  <style>
+    #checkinmap {
+      width: 50%;
+      height: 180px;
+      margin-bottom: 20px;
+    }
+
+    body {
+      width: 70%;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    a#next {
+      background-color: red;
+      color: white;
+      padding: 1em 1.5em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    a#next:hover {
+      background-color: #555;
+    }
+
+    a#next:active {
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Check-In App</h1>
+  <br />
+  <a href="all.html" id="next">View Checkins</a>
+
+  <br /><br />
+  <p>
+    You are currently in the following location:<br />
+    <i>Latitude:</i> <span id="latitude"></span>&deg;<br />
+    <i>Longitude:</i> <span id="longitude"></span>&deg;
+  </p>
+
+  <p>Below you can see your location on the map. <br />Press the <b>checkin button</b> to save a checkin and view
+    them in the view checkins page
+  </p>
+
+  <div id="checkinmap"></div>
+
+  <button id="checkin">check in</button>
+
+  <script>
+    let lat, lon;
+    if ('geolocation' in navigator) {
+      console.log('geolocation available');
+      navigator.geolocation.getCurrentPosition(async position => {
+        console.log('cordinates recieved');
+        lat = position.coords.latitude;
+        lon = position.coords.longitude;
+        document.getElementById('latitude').textContent = lat.toFixed(2);
+        document.getElementById('longitude').textContent = lon.toFixed(2);
+      });
+    } else {
+      console.log('geolocation not available');
+    }
+
+
+    //Map Stuff BEGIN
+    const mymap = L.map('checkinmap').setView([0, 0], 1);
+    const attribution =
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const tiles = L.tileLayer(tileUrl, {
+      attribution
+    });
+
+    tiles.addTo(mymap);
+
+    var map = function () {
+      if (typeof lat != 'number') {
+        setTimeout(map, 1000)
+      } else {
+        L.marker([lat, lon]).addTo(mymap);
+        mymap.setView([lat, lon], 2);
+      };
+    }
+
+    map();
+    //Map Stuff END
+
+    const button = document.getElementById('checkin');
+    button.addEventListener('click', async event => {
+      const data = {
+        lat,
+        lon
+      };
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      };
+      const response = await fetch('/api', options);
+      const json = await response.json();
+      console.log(json);
+    });
+  </script>
+</body>
+
+</html>

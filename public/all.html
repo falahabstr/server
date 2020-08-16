@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style>
+    body {
+      width: 70%;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    a#back {
+      background-color: red;
+      color: white;
+      padding: 1em 1.5em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    a#back:hover {
+      background-color: #555;
+    }
+
+    a#back:active {
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Check-In App</h1>
+  <a href="dataselfieapp.html" id="back">back</a>
+  <br><br>
+  <p>You were checked in at the following locations and dates:</p>
+  <script>
+    getData();
+
+    async function getData() {
+      const response = await fetch('/api');
+      const data = await response.json();
+
+      for (item of data) {
+        const root = document.createElement('p');
+        const geo = document.createElement('div');
+        const time = document.createElement('div');
+        const timeString = new Date(item.timestamp).toLocaleDateString();
+
+        geo.textContent = `${item.lat} , ${item.lon} `;
+        time.textContent = timeString;
+
+        root.append(geo, time);
+        document.body.append(root);
+      };
+
+      console.log(data);
+    }
+  </script>
+</body>
+
+</html>
